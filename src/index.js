@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 ReactDOM.render(
   <React.StrictMode>
     <App />
+    {/* 외부적으로 드러날 필요가 없는 정보를 은닉하는 것 */}
   </React.StrictMode>,
   document.getElementById('root')
 );
