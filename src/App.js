@@ -2,9 +2,11 @@
 import React, { Component } from 'react';
 import './App.css';
 import TOC from "./components/TOC";
-import Contents from "./components/Content";
+import ReadContent from "./components/ReadContent";
+import CreateContent from "./components/CreateContent";
+import UpdateContent from "./components/UpdateContent";
 import Subject from "./components/Subject";
-
+import Control from "./components/Control";
 
 
 
@@ -12,8 +14,9 @@ class App extends Component{ //하나의 컴포넌트
   constructor(props){ 
     //render 함수보다 먼저 실행되면서 컴포넌트를 초기화시켜주고 싶으면 constructor를 만들어서 사용
     super(props);
+    this.max_content_id=3; // create 할 때 state값으로 넣기 위해 원래 있는 정보 다음 인덱스를 선언
     this.state={
-      mode:'read',
+      mode:'create',
       selected_content_id:2,
       subject:{title:'WEB', sub:'World wid Web!'},
       // state를 통해 값을 이 안의 값으로 초기화 시켜주는 것
@@ -26,24 +29,70 @@ class App extends Component{ //하나의 컴포넌트
       ]
     }
   }
-  render() {
-    var _title, _desc = null;
+  getReadContent(){
+    var i = 0;
+    while(i<this.state.contents.length){
+      var data=this.state.contents[i];
+      if(data.id === this.state.selected_content_id){
+        return data;
+        break;
+      }
+      i=i+1;
+    }
+  }
+  getContent(){
+    var _title, _desc, _article = null;
     if(this.state.mode === 'welcome'){
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
+      _article=<ReadContent title={_title} desc={_desc}></ReadContent>
     }
     else if(this.state.mode === 'read'){
-      var i = 0;
-      while(i<this.state.contents.length){
-        var data=this.state.contents[i];
-        if(data.id === this.state.selected_content_id){
-          _title = data.title;
-          _desc = data.desc;
-          break;
-        }
-        i=i+1;
-      } 
+      var _content=this.getReadContent();
+      _article=<ReadContent title={_content.title} desc={_content.desc}></ReadContent>
+
     }
+    else if(this.state.mode === 'create'){
+        _article=<CreateContent onSubmit={function(_title,_desc){
+        //add content to this.state.contents
+        this.max_content_id=this.max_content_id+1;
+        // this.state.contents.push( // push < concat -> concat은 원본을 바꾸지 않고 결합해주기 때문에 지향해야함
+        //   {id:this.max_content_id, title:_title, desc:_desc}
+        // );
+        var _contents = this.state.contents.concat( 
+          //  원본을 복제해서 값을 결합하고 새로운 배열에 추가한 다음 setState에 넣어줌 -> 훨씬 좋은 방법
+          {id:this.max_content_id, title:_title, desc:_desc}
+        );
+        this.setState({ 
+          // push 만 하면 react가 모르기 때문에 이거 꼭 해줘야 함
+          contents:_contents
+        });
+        console.log(_title,_desc);
+      }.bind(this)}></CreateContent>
+    }
+    else if(this.state.mode === 'update'){
+      _content=this.getReadContent();
+      _article=<UpdateContent data={_content} onSubmit={function(_id,_title,_desc){
+        //add content to this.state.contents
+        var _contents=Array.from(this.state.contents);
+        var i=0;
+        while(i<_contents.length){
+          if(_contents[i].id === _id){
+            _contents[i]={id:_id, title:_title, desc:_desc};
+            break;
+          }
+          i=i+1;
+        }
+        this.setState({ 
+          // push 만 하면 react가 모르기 때문에 이거 꼭 해줘야 함
+          contents:_contents
+        });
+        console.log(_title,_desc);
+      }.bind(this)}></UpdateContent>
+    }
+    return _article;
+  }
+  render() {
     return (
       <div className="App">
         <Subject 
@@ -63,7 +112,12 @@ class App extends Component{ //하나의 컴포넌트
           });
         }.bind(this)}
         data={this.state.contents}></TOC>
-        <Contents title={_title} desc={_desc}></Contents>
+        <Control onChangeMode={function(_mode){
+          this.setState({
+            mode:_mode
+          });
+        }.bind(this)}></Control>
+        {this.getContent()}
         {/* <Component props_name="props_value"> */}
       </div>
     );

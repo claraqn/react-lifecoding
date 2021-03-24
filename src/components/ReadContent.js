@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class Contents extends Component{
+class ReadContent extends Component{
     render(){
       return (
         <footer>
@@ -11,4 +11,4 @@ class Contents extends Component{
     }
   }
   
-  export default Contents; // class 이름과 동일하게 적어줘야 함
+  export default ReadContent; // class 이름과 동일하게 적어줘야 함
